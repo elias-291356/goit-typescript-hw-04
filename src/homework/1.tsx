@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef} from 'react';
 
 // Опишіть Props
-type Props = {
+interface IObserverProps  {
   children: React.ReactNode;
   onContentEndVisible: () => void;
 };
-export function Observer({ children, onContentEndVisible }: Props) {
+export function Observer({ children, onContentEndVisible }: IObserverProps) {
   // Вкажіть правильний тип для useRef зверніть увагу, в який DOM елемент ми його передаємо
   const endContentRef = useRef<HTMLDivElement>(null);
 

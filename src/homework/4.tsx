@@ -1,91 +1,101 @@
-// import React, { createContext, useMemo, useState, useContext } from "react";
-// import noop from "lodash/noop";
+import React, { createContext, useMemo, useState, useContext } from "react";
+import noop from "lodash/noop";
 
-// type MenuIds = "first" | "second" | "last";
-// type Menu = { id: MenuIds; title: string };
+type MenuIds = "first" | "second" | "last";
+type Menu = {
+  id: MenuIds;
+  title: string;
+};
+// Додати тип Menu Selected
+type SelectedMenu = {
+  id: MenuIds;
+};
+const MenuSelectedContext = createContext<{ selectedMenu: SelectedMenu }>({
+  selectedMenu: { id: "first" },
+});
 
-// // Додати тип Menu Selected
+// Додайте тип MenuAction
+type MenuAction = {
+  onSelectedMenu: (menu: SelectedMenu) => void;
+};
+const MenuActionContext = createContext<MenuAction>({
+  onSelectedMenu: noop,
+});
 
-// const MenuSelectedContext = createContext<MenuSelected>({
-//   selectedMenu: {},
-// });
+type PropsProvider = {
+  children: React.ReactNode; // Додати тип для children
+};
 
-// // Додайте тип MenuAction
+function MenuProvider({ children }: PropsProvider) {
+  // Додати тип для SelectedMenu він повинен містити { id }
+  type SelectedMenu = {
+    id: MenuIds;
+  };
+  const [selectedMenu, setSelectedMenu] = useState<SelectedMenu>({
+    id: "first",
+  });
 
-// const MenuActionContext = createContext<MenuAction>({
-//   onSelectedMenu: noop,
-// });
+  const menuContextAction = useMemo(
+    () => ({
+      onSelectedMenu: setSelectedMenu,
+    }),
+    []
+  );
 
-// type PropsProvider = {
-//   children; // Додати тип для children
-// };
+  const menuContextSelected = useMemo(
+    () => ({
+      selectedMenu,
+    }),
+    [selectedMenu]
+  );
 
-// function MenuProvider({ children }: PropsProvider) {
-//   // Додати тип для SelectedMenu він повинен містити { id }
-//   const [selectedMenu, setSelectedMenu] = useState<SelectedMenu>({});
+  return (
+    <MenuActionContext.Provider value={menuContextAction}>
+      <MenuSelectedContext.Provider value={menuContextSelected}>
+        {children}
+      </MenuSelectedContext.Provider>
+    </MenuActionContext.Provider>
+  );
+}
 
-//   const menuContextAction = useMemo(
-//     () => ({
-//       onSelectedMenu: setSelectedMenu,
-//     }),
-//     []
-//   );
+type PropsMenu = {
+  menus: Menu[]; // Додайте правильний тип для меню
+};
+function MenuComponent({ menus }: PropsMenu) {
+  const { onSelectedMenu } = useContext(MenuActionContext);
+  const { selectedMenu } = useContext(MenuSelectedContext);
 
-//   const menuContextSelected = useMemo(
-//     () => ({
-//       selectedMenu,
-//     }),
-//     [selectedMenu]
-//   );
+  return (
+    <>
+      {menus.map((menu: Menu) => (
+        <div key={menu.id} onClick={() => onSelectedMenu({ id: menu.id })}>
+          {menu.title}{" "}
+          {selectedMenu.id === menu.id ? "Selected" : "Not selected"}
+        </div>
+      ))}
+    </>
+  );
+}
 
-//   return (
-//     <MenuActionContext.Provider value={menuContextAction}>
-//       <MenuSelectedContext.Provider value={menuContextSelected}>
-//         {children}
-//       </MenuSelectedContext.Provider>
-//     </MenuActionContext.Provider>
-//   );
-// }
+export function ComponentApp() {
+  const menus: Menu[] = [
+    {
+      id: "first",
+      title: "first",
+    },
+    {
+      id: "second",
+      title: "second",
+    },
+    {
+      id: "last",
+      title: "last",
+    },
+  ];
 
-// type PropsMenu = {
-//   menus; // Додайте вірний тип для меню
-// };
-
-// function MenuComponent({ menus }: PropsMenu) {
-//   const { onSelectedMenu } = useContext(MenuActionContext);
-//   const { selectedMenu } = useContext(MenuSelectedContext);
-
-//   return (
-//     <>
-//       {menus.map((menu) => (
-//         <div key={menu.id} onClick={() => onSelectedMenu({ id: menu.id })}>
-//           {menu.title}{" "}
-//           {selectedMenu.id === menu.id ? "Selected" : "Not selected"}
-//         </div>
-//       ))}
-//     </>
-//   );
-// }
-
-// export function ComponentApp() {
-//   const menus: Menu[] = [
-//     {
-//       id: "first",
-//       title: "first",
-//     },
-//     {
-//       id: "second",
-//       title: "second",
-//     },
-//     {
-//       id: "last",
-//       title: "last",
-//     },
-//   ];
-
-//   return (
-//     <MenuProvider>
-//       <MenuComponent menus={menus} />
-//     </MenuProvider>
-//   );
-// }
+  return (
+    <MenuProvider>
+      <MenuComponent menus={menus} />
+    </MenuProvider>
+  );
+}
