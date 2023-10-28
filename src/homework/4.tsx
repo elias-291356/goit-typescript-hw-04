@@ -10,7 +10,10 @@ type Menu = {
 type SelectedMenu = {
   id?: MenuIds;
 };
-const MenuSelectedContext = createContext<{ selectedMenu: SelectedMenu }>({
+type MenuSelected = {
+  selectedMenu: SelectedMenu;
+};
+const MenuSelectedContext = createContext<MenuSelected>({
   selectedMenu: {},
 });
 
